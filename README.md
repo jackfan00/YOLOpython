@@ -1,28 +1,35 @@
 # YOLOpython
 
-1 Introduction
+Introduction
+---------------------------------------------------------------------------------------------------
 
 This is a Keras implementation of the YOLO:Real-Time Object Detection
 reference to http://pjreddie.com/darknet/yolo/
 
-2 Usage
+Usage
+---------------------------------------------------------------------------------------
 
 Training
-Python src/yolo.py train cfg/your.cfg [saved_Keras_model.h5]
+
+    Python src/yolo.py train cfg/your.cfg [saved_Keras_model.h5]
 If saved_Keras_model.h5 option used, it will read in and do incrmentally training
 Otherwise train from scratch
 
 Predict
-Python src/yolo.py test cfg/your.cfg saved_Keras_model.h5 predicted_image.jpg
+
+    Python src/yolo.py test cfg/your.cfg saved_Keras_model.h5 predicted_image.jpg
 
 
-3 Need to know about code
+Need to know about code
+---------------------------------------------------------------------------------------------
 
 The diffcult part to implement is loss function (the equation reference to http://pjreddie.com/media/files/papers/yolo_1.pdf)
 When we change the bounding box number for one cell or classes number, we need to modify the loss code
-Can not just modify cfg file then GO.
+  
+    Can not just modify cfg file then GO, if we change bounding box number for one cell or classes number
 
-4 Loss function code explanation
+Loss function code explanation
+--------------------------------------------------------------------------------------
 
 Truth table format arrangement as follow
   one sample : confidence,x,y,w,h,classes, and confidence,x,y,w,h each size is gridcell^2 , 
