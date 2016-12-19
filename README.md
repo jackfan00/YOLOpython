@@ -4,7 +4,8 @@ Introduction
 ---------------------------------------------------------------------------------------------------
 
 This is a Keras implementation of the YOLO:Real-Time Object Detection
-reference to http://pjreddie.com/darknet/yolo/
+
+        YOLO paper please reference to http://pjreddie.com/darknet/yolo/
 
 Usage
 ---------------------------------------------------------------------------------------
@@ -12,8 +13,9 @@ Usage
 Training
 
     Python src/yolo.py train cfg/your.cfg [saved_Keras_model.h5]
-If saved_Keras_model.h5 option used, it will read in and do incrmentally training
+If saved_Keras_model.h5 option used, it will read in pretrained model and do incrmentally training
 Otherwise train from scratch
+
 
 Predict
 
