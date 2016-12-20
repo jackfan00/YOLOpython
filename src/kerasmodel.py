@@ -9,35 +9,12 @@ from keras.layers.pooling import GlobalAveragePooling2D as GAP2D
 import tensorflow as tf
 import keras.optimizers as opt
 
-# loss really use this
 import testyololoss
-#
-# loss according to yolo paper
-#
-# pred tabel is num boundingBox for 1 grid cell
-# detection_layer.side**2*((1+detection_layer.coords)*detection_layer.num+detection_layer.classes)
-# truth tabel is 1 boundingBox for 1 grid cell
-# detection_layer.truths = detection_layer.side**2*(1+detection_layer.coords+detection_layer.classes)
-#
-def yolo_loss11111(y_true, y_pred, detection_layer):
-	totloss = 0
-	bnum = 1+detection_layer.coords
-	truthsofcell = 1+detection_layer.coords+detection_layer.classes
-	predsofcell = (1+detection_layer.coords)*detection_layer.num+detection_layer.classes
-	for cell in range(detection_layer.side**2):
-		for i in range(detection_layer.num):
-			xyloss = (y_true[cell*truthsofcell:cell*truthsofcell+2] - y_pred[(cell*predsofcell)+(i*bnum):(cell*predsofcell)+(i*bnum)]+2)**2
-			whloss = (tf.sqrt(y_true[cell*truthsofcell+2:cell*truthsofcell+4]) - tf.sqrt(y_pred[(cell*predsofcell+2)+(i*bnum):(cell*predsofcell+4)+(i*bnum)]))**2
-			confidloss = (y_true[cell*truthsofcell+4:cell*truthsofcell+5] - y_pred[(cell*predsofcell+4)+(i*bnum):(cell*predsofcell+5)+(i*bnum)])**2
-			porbloss = (y_true[cell*truthsofcell+bnum:(cell+1)*truthsofcell] - y_pred[cell*predsofcell+detection_layer.num*bnum:(cell+1)*predsofcell])**2
 
-# weighting loss according object exist state, reference to yolo paper
-		if y_true[cell*truthsofcell+4] == 0:  # I OBJ ij, reference yolo paper
-			totloss += detection_layer.coord_scale*(tf.reduce_sum(xyloss)+tf.reduce_sum(whloss))+tf.reduce_sum(confidloss)+tf.reduce_sum(porbloss)
-		else:
-			totloss += detection_layer.noobject_scale*tf.reduce_sum(confidloss)
+# loss really use this
+import ddd
 
-	return totloss
+
 
 def printmodel(model):
 	#print len(model.layers)
@@ -96,7 +73,7 @@ def makenetwork(net):
 		elif l.type == '[detection]':
 			testyololoss.check(l,model)
 			sgd = opt.SGD(lr=net.learning_rate, decay=net.decay, momentum=net.momentum, nesterov=True)
-			model.compile(loss = testyololoss.yololoss, optimizer=sgd)
+			model.compile(loss=ddd.yololoss, optimizer=sgd)
 		print l.type + str(index)
 		index = index+1
 

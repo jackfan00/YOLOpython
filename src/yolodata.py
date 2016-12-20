@@ -8,6 +8,7 @@ class yolobbox():
 
 def readlabel(fn):
 	#print 'readlabel '+ fn
+	boxlist = []
 	f = open(fn)
 	box = yolobbox()
 	for l in f:
@@ -20,7 +21,8 @@ def readlabel(fn):
 			box.h = float(ss[4]) 
 		except:
 			box.id = -1
-	return box
+		boxlist.append(box)
+	return boxlist
 		
 def load_data(train_images, h, w, c, net):
 	f = open(train_images)
@@ -52,30 +54,37 @@ def load_data(train_images, h, w, c, net):
 		fn=fn.replace(".JPG",".txt")
 		#print fn
 
-		box = readlabel(fn.strip())
-		if box.id == -1:
-			print 'read bbox fail'
-			continue
+		#
+		# may have multi bounding box for 1 image
+		boxlist = readlabel(fn.strip())
+		for box in boxlist:
+			if box.id == -1:
+				print 'read bbox fail'
+				continue
 
 
-		#
-		# let truth size == pred size, different from yolo.c 
-		# trurh data arrangement is (confid,x,y,w,h)(..)(classes)
-		#
-		truth = np.zeros(gridcells**2*(bckptsPercell*bnumPercell+classes))
-		col = int(box.x * gridcells)
-		row = int(box.y * gridcells)
-		x = box.x * gridcells - col
-		y = box.y * gridcells - row
-		for i in range(bnumPercell):
-			index = (col+row*gridcells)*(bckptsPercell*bnumPercell+classes) + bckptsPercell*i
+			#
+			# let truth size == pred size, different from yolo.c 
+			# trurh data arrangement is (confid,x,y,w,h)(..)(classes)
+			#
+			truth = np.zeros(gridcells**2*(bckptsPercell*bnumPercell+classes))
+			col = int(box.x * gridcells)
+			row = int(box.y * gridcells)
+			x = box.x * gridcells - col
+			y = box.y * gridcells - row
+
+			# only 1 box for 1 cell
+			#for i in range(bnumPercell):
+			index = (col+row*gridcells)
 			truth[index] = 1
-			truth[index+1] = x
-			truth[index+2] = y
-			truth[index+3] = box.w
-			truth[index+4] = box.h
+			truth[gridcells**2+index] = x
+			truth[2*(gridcells**2)+index] = y
+			truth[3*(gridcells**2)+index] = box.w
+			truth[4*(gridcells**2)+index] = box.h
 			#print 'index='+str(index)+' '+str(box.x)+' '+str(box.y)+' '+str(box.w)+' '+str(box.h)
-		truth[index+bckptsPercell*bnumPercell+box.id] =1
+			truth[(5+box.id)*(gridcells**2)+index] =1
+
+		#
 		Y_train.append(truth)
 
 		#print 'draw rect bounding box'
@@ -86,12 +95,13 @@ def load_data(train_images, h, w, c, net):
 		#exit()
 		#for row_cell in range(7):
 		#	for col_cell in range(7):
-		#		sys.stdout.write( str(truth[col_cell*7+row_cell*(7*7)])+', ' )
+		#		sys.stdout.write( str(truth[col_cell+row_cell*(7)])+', ' )
 		#	print '-'
 
 		#print truth[720:740]
 		#exit()
-		if count > 10:
+		# this is for debug
+		if count > 0:
 			break
 		else:
 			count = count + 1

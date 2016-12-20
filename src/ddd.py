@@ -7,6 +7,7 @@ lamda_confid_obj = 48
 lamda_confid_noobj = 1
 classes = 2
 
+DEBUG_loss = False
 
 # shape is (gridcells,)
 def yoloconfidloss(y_true, y_pred, t):
@@ -80,24 +81,30 @@ def yololoss(y_true, y_pred):
 		classesloss += closs
 
 	loss = confidloss+xloss+yloss+wloss+hloss+classesloss
-	return loss,confidloss,xloss,yloss,wloss,hloss,classesloss
+	#
+	#return loss,confidloss,xloss,yloss,wloss,hloss,classesloss
+	return loss
 
 
-x =K.placeholder(ndim=2)
-y =K.placeholder(ndim=2)
-loss,confidloss,xloss,yloss,wloss,hloss,classesloss = yololoss(y,x)
 
-f = K.function([y,x], [loss,confidloss,xloss,yloss,wloss,hloss,classesloss])
+#
+#
+if DEBUG_loss:
+	x =K.placeholder(ndim=2)
+	y =K.placeholder(ndim=2)
+	loss,confidloss,xloss,yloss,wloss,hloss,classesloss = yololoss(y,x)
 
-xtrain = np.ones(343*10).reshape(10,343)
-ytrain = np.zeros(343*10).reshape(10,343)
-ytrain[0][0]=1
-ytrain[0][49]=0.1
-ytrain[0][49*2]=0.2
-ytrain[0][49*3]=0.3
-ytrain[0][49*4]=0.4
-ytrain[0][49*5]=1
+	f = K.function([y,x], [loss,confidloss,xloss,yloss,wloss,hloss,classesloss])
+
+	xtrain = np.ones(343*10).reshape(10,343)
+	ytrain = np.zeros(343*10).reshape(10,343)
+	ytrain[0][0]=1
+	ytrain[0][49]=0.1
+	ytrain[0][49*2]=0.2
+	ytrain[0][49*3]=0.3
+	ytrain[0][49*4]=0.4
+	ytrain[0][49*5]=1
 
 
-print f([ytrain,xtrain])
+	print f([ytrain,xtrain])
 

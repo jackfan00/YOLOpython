@@ -109,9 +109,9 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 
 	pred = testmodel.predict(np.asarray(X_test))
 	for p in pred:
-		for row_cell in range(7):
-			for col_cell in range(7):
-				sys.stdout.write( str(p[col_cell*7+row_cell*(7*7)])+', ' )
+		for i in range(7):
+			for j in range(7):
+				sys.stdout.write( str(p[i*7+j])+', ' )
 			print '-'
 	#print pred
 

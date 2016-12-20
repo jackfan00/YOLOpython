@@ -61,7 +61,8 @@ def parse_detection(options, params):
 	detection_layer.coords = option_find_int(options, "coords", 1);
 	detection_layer.classes = option_find_int(options, "classes", 1);
 	detection_layer.rescore = option_find_int(options, "rescore", 0);
-	detection_layer.num = option_find_int(options, "num", 1);
+	#only 1 box for 1 cell
+	detection_layer.num = 1 # option_find_int(options, "num", 1);
 	detection_layer.side = option_find_int(options, "side", 7);
 	
 	# assert side*side*((1+coords)*num+classes) == inputs
