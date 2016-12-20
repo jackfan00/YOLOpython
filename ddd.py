@@ -81,7 +81,9 @@ def yololoss(y_true, y_pred):
 		classesloss += closs
 
 	loss = confidloss+xloss+yloss+wloss+hloss+classesloss
-	return loss,confidloss,xloss,yloss,wloss,hloss,classesloss
+	#
+	#return loss,confidloss,xloss,yloss,wloss,hloss,classesloss
+	return loss
 
 
 

@@ -95,13 +95,13 @@ def load_data(train_images, h, w, c, net):
 		#exit()
 		#for row_cell in range(7):
 		#	for col_cell in range(7):
-		#		sys.stdout.write( str(truth[col_cell*7+row_cell*(7*7)])+', ' )
+		#		sys.stdout.write( str(truth[col_cell+row_cell*(7)])+', ' )
 		#	print '-'
 
 		#print truth[720:740]
 		#exit()
 		# this is for debug
-		if count > 10:
+		if count > 0:
 			break
 		else:
 			count = count + 1

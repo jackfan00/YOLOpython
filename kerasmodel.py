@@ -9,6 +9,8 @@ from keras.layers.pooling import GlobalAveragePooling2D as GAP2D
 import tensorflow as tf
 import keras.optimizers as opt
 
+import testyololoss
+
 # loss really use this
 import ddd
 
@@ -71,7 +73,7 @@ def makenetwork(net):
 		elif l.type == '[detection]':
 			testyololoss.check(l,model)
 			sgd = opt.SGD(lr=net.learning_rate, decay=net.decay, momentum=net.momentum, nesterov=True)
-			model.compile(loss = ddd.yololoss, optimizer=sgd)
+			model.compile(loss=ddd.yololoss, optimizer=sgd)
 		print l.type + str(index)
 		index = index+1
 
