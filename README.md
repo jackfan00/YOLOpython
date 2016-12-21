@@ -88,3 +88,9 @@ First following the STEP 1 ~ 9 , then at STEP 10, use follows instead
 then follow 3.1.0 setup is OK.
 
 
+Be caution at STEP 11, "ln -s /usr/local/lib/python2.7/site-packages/cv2.so cv2.so" may not work
+because of the wrong cv2.so path. If something wrong, check out the path where your cv2.so be installed. 
+In my case cv2.so at /usr/local/lib/python2.7/dist-packages/cv2/cv2.so
+
+
+
