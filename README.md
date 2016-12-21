@@ -7,6 +7,7 @@ This is a Keras implementation of the YOLO:Real-Time Object Detection
 
         YOLO paper please reference to http://pjreddie.com/darknet/yolo/
 
+
 Usage
 ---------------------------------------------------------------------------------------
 
@@ -65,3 +66,25 @@ Truth table format arrangement as follow
   
   
   The reason for the trurh table arrangement is for YOLO custom loss implementation.
+  
+  
+OPENCV enviroment setup (ubuntu 16.04 + CUDA 8.0)
+--------------------------------------------------------------------------------------------------
+
+Please reference to http://www.pyimagesearch.com/2015/06/22/install-opencv-3-0-and-python-2-7-on-ubuntu/
+
+follow its steps will fail if you use CUDA 8.0 , need to do some modification.
+First following the STEP 1 ~ 9 , then at STEP 10, use follows instead 
+                
+                1.cd ~
+                2.git clone https://github.com/daveselinger/opencv
+                3.cd opencv
+                4.git checkout 3.1.0-with-cuda8
+                
+                at opencv_contrib part also use "git checkout 3.1.0"
+                
+                please reference to https://github.com/opencv/opencv/issues/6677
+                
+then follow 3.1.0 setup is OK.
+
+
