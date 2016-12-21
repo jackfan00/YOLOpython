@@ -56,11 +56,12 @@ Loss function code explanation
 --------------------------------------------------------------------------------------
 
 Truth table format arrangement as follow
-  one sample : confidence,x,y,w,h,classes, and confidence,x,y,w,h each size is gridcell^2 , 
-  classes size is (gridcell^2) * classes
+  for one training sample : truth atble format is [confidence,x,y,w,h,classes], and [confidence,x,y,w,h,classes] each element 
+  size is gridcell^2 
   
-  Ex : gridcell =7, classes =2, then truth dimension is (7^2) * (5 + 2) = 343
-  and for this 343 vector, index 0~47 is confidence, 48~97 is x, 98~146 is y, 147~195 is w, 
-  196~244 is h, 245~342 is classes
+  Given a example : gridcell =7, classes =2, then truth table dimension is (7^2) * (5 + 2) = 343.
+  In this truth vector, index 0~48 represent confidence, 49~97 represent x, 98~146 represent y, 
+  147~195 represent w, 196~244 represent h, 245~293 represent class 0, 294~342 represent class 1
   
-  This arrangement's purpose is for custom loss implementation
+  
+  The reason for the trurh table arrangement is for YOLO custom loss implementation.
