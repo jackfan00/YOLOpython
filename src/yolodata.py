@@ -103,7 +103,7 @@ def load_data(train_images, h, w, c, net):
 		#print truth[720:740]
 		#exit()
 		# this is for debug
-		if count > 1000:
+		if count > 0:
 			break
 		else:
 			count = count + 1

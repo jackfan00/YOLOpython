@@ -1,15 +1,30 @@
 from keras import backend as K
 import tensorflow as tf
 import numpy as np
+import cfgconst
 
-gridcells = 7**2
-lamda_confid_obj = 48
-lamda_confid_noobj = 1
-lamda_xy = 10
-lamda_wh = 15
-reguralar_wh = 0.1
-lamda_class = 20
-classes = 2
+CFGEN = True
+if CFGEN:
+	det_l = cfgconst.net.layers[len(cfgconst.net.layers)-1]
+	side = det_l.side
+        gridcells = side**2
+        lamda_confid_obj = det_l.object_scale
+        lamda_confid_noobj = det_l.noobject_scale
+        lamda_xy = det_l.coord_scale
+        lamda_wh = det_l.coord_scale
+        reguralar_wh = 0
+        lamda_class = det_l.class_scale
+        classes = det_l.classes
+
+else:
+	gridcells = 7**2
+	lamda_confid_obj = 48
+	lamda_confid_noobj = 1
+	lamda_xy = 10
+	lamda_wh = 15
+	reguralar_wh = 0.1
+	lamda_class = 20
+	classes = 2
 
 DEBUG_loss = False
 
