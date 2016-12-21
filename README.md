@@ -12,7 +12,7 @@ Usage
 
 Training
 
-    Python src/yolo.py train cfg/your.cfg [saved_Keras_model.h5]
+    Python src/yolo.py train workingcfg.txt [saved_Keras_model.h5]
 If saved_Keras_model.h5 option used, it will read in pretrained model and do incrmentally training
 Otherwise train from scratch
 
@@ -25,10 +25,32 @@ Predict
 Need to know about code
 ---------------------------------------------------------------------------------------------
 
-The diffcult part to implement is loss function (the equation reference to http://pjreddie.com/media/files/papers/yolo_1.pdf)
-When we change the bounding box number for one cell or classes number, we need to modify the loss code
-  
-    Can not just modify cfg file then GO, if we change bounding box number for one cell or classes number
+Code explanation:
+
+workingcfg.txt : put your cfg file in this file
+
+yolo.py : main function
+
+yolodata.py : read train_data/train.txt, then generate resized X_train and proper Y_train numpy matrix
+
+ddd.py : create custom YOLO loss function (the equation reference to http://pjreddie.com/media/files/papers/yolo_1.pdf)
+
+kerasmodel.py : create Keras model according to cfg file
+
+parse.py : parse cfg file
+
+cfgconst.py : read workingcfg.txt then call parse.py to parse the correcponding cfg file
+
+utils.py, darknet.py : misc
+
+
+Running enviroment 
+--------------------------------------------------------------------------------------------
+
+train_data/train.txt : contain training image data file list 
+
+train_data/[images/labels] folder : contain training image files and corresponding label text files
+
 
 Loss function code explanation
 --------------------------------------------------------------------------------------
