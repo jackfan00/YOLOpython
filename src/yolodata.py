@@ -50,8 +50,8 @@ def load_data(train_images, h, w, c, net):
 		# replace to label path
 		fn=fn.replace("images","labels")
 		fn=fn.replace(".JPEG",".txt")
-		fn=fn.replace(".jpg",".txt")
-		fn=fn.replace(".JPG",".txt")
+		#fn=fn.replace(".jpg",".txt")
+		#fn=fn.replace(".JPG",".txt")
 		#print fn
 
 		#
@@ -88,20 +88,22 @@ def load_data(train_images, h, w, c, net):
 		Y_train.append(truth)
 
 		#print 'draw rect bounding box'
-		#draw = ImageDraw.Draw(nim)
-		#draw.rectangle([(box.x-box.w/2)*w,(box.y-box.y/2)*h,(box.x+box.w/2)*w,(box.y+box.y/2)*h])
+		#draw = ImageDraw.Draw(img)
+		#draw.rectangle([(box.x-box.w/2)*orgw,(box.y-box.h/2)*orgh,(box.x+box.w/2)*orgw,(box.y+box.h/2)*orgh])
 		#del draw
-		#nim.save('ttt.png')
+		#img.save('ttt.png')
 		#exit()
-		#for row_cell in range(7):
-		#	for col_cell in range(7):
-		#		sys.stdout.write( str(truth[col_cell+row_cell*(7)])+', ' )
-		#	print '-'
+		#for k in range(7):
+		#	print 'L'+str(k)
+		#	for row_cell in range(7):
+		#		for col_cell in range(7):
+		#			sys.stdout.write( str(truth[k*49+col_cell+row_cell*(7)])+', ' )
+		#		print '-'
 
 		#print truth[720:740]
 		#exit()
 		# this is for debug
-		if count > 0:
+		if count > 1000:
 			break
 		else:
 			count = count + 1

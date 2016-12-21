@@ -6,11 +6,13 @@ import utils
 import parse
 import kerasmodel
 import yolodata
-import testyololoss
+import ddd
 from keras.models import load_model
 from PIL import Image
 import numpy as np
 from keras import backend as K
+import keras.optimizers as opt
+
 
 # define constant
 CLASSNUM = 2
@@ -48,7 +50,10 @@ def train_yolo(cfg_path, weights_path):
 	# load pretrained model 
 	if os.path.isfile(model_weights_path):
 		print 'Loading '+model_weights_path
-		model=load_model(model_weights_path, custom_objects={'yololoss': testyololoss.yololoss})
+		model=load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
+		sgd = opt.SGD(lr=net.learning_rate, decay=net.decay, momentum=net.momentum, nesterov=True)
+		model.compile(loss=ddd.yololoss, optimizer=sgd)
+
 	else:
 	
 		# base is cfg name
@@ -86,7 +91,7 @@ def train_yolo(cfg_path, weights_path):
 
 def debug_yolo( cfg_path, model_weights_path='yolo_jack_kerasmodel.h5' ):
 	net = parse.parse_network_cfg(cfg_path)
-	testmodel = load_model(model_weights_path, custom_objects={'yololoss': testyololoss.yololoss})
+	testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
 	(s,w,h,c) = testmodel.layers[0].input_shape
 	x_test,y_test = yolodata.load_data('train_data/test.txt', h, w, c, net)
 	testloss = testmodel.evaluate(x_test,y_test)
@@ -96,7 +101,7 @@ def debug_yolo( cfg_path, model_weights_path='yolo_jack_kerasmodel.h5' ):
 def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thresh=0.5):
 	print 'test_yolo'
 	# custom objective function
-	testmodel = load_model(model_weights_path, custom_objects={'yololoss': testyololoss.yololoss})
+	testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
 	(s,w,h,c) = testmodel.layers[0].input_shape
 	#print (s,w,h,c)
 	#exit()
@@ -108,11 +113,14 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 		X_test.append(np.asarray(nim))
 
 	pred = testmodel.predict(np.asarray(X_test))
+	
 	for p in pred:
-		for i in range(7):
-			for j in range(7):
-				sys.stdout.write( str(p[i*7+j])+', ' )
-			print '-'
+		for k in range(7):
+			print 'L'+str(k)
+			for i in range(7):
+				for j in range(7):
+					sys.stdout.write( str(p[k*49+i*7+j])+', ' )
+				print '-'
 	#print pred
 
 def demo_yolo(cfg_path,weights_path,thresh,cam_index,filename):

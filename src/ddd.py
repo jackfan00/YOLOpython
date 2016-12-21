@@ -5,6 +5,10 @@ import numpy as np
 gridcells = 7**2
 lamda_confid_obj = 48
 lamda_confid_noobj = 1
+lamda_xy = 10
+lamda_wh = 15
+reguralar_wh = 0.1
+lamda_class = 20
 classes = 2
 
 DEBUG_loss = False
@@ -22,15 +26,17 @@ def yoloconfidloss(y_true, y_pred, t):
 # shape is (gridcells*2,)
 def yoloxyloss(y_true, y_pred, t):
         lo = K.square(y_true-y_pred)
-        value_if_true = (lo)
+        value_if_true = lamda_xy*(lo)
         value_if_false = K.zeros_like(y_true)
         loss1 = tf.select(t, value_if_true, value_if_false)
 	return K.mean(loss1)
 
 # shape is (gridcells*2,)
 def yolowhloss(y_true, y_pred, t):
-        lo = K.square(K.sqrt(y_true)-K.sqrt(y_pred))
-        value_if_true = (lo)
+        #lo = K.square(K.sqrt(y_true)-K.sqrt(y_pred))
+	# let w,h not too small or large
+        lo = K.square(y_true-y_pred)+reguralar_wh*K.square(0.5-y_pred)
+        value_if_true = lamda_wh*(lo)
         value_if_false = K.zeros_like(y_true)
         loss1 = tf.select(t, value_if_true, value_if_false)
 	return K.mean(loss1)
@@ -38,7 +44,7 @@ def yolowhloss(y_true, y_pred, t):
 # shape is (gridcells*classes,)
 def yoloclassloss(y_true, y_pred, t):
         lo = K.square(y_true-y_pred)
-        value_if_true = (lo)
+        value_if_true = lamda_class*(lo)
         value_if_false = K.zeros_like(y_true)
         loss1 = tf.select(t, value_if_true, value_if_false)
 	return K.mean(loss1)
@@ -81,11 +87,21 @@ def yololoss(y_true, y_pred):
 		classesloss += closs
 
 	loss = confidloss+xloss+yloss+wloss+hloss+classesloss
+	#loss = wloss+hloss
 	#
 	#return loss,confidloss,xloss,yloss,wloss,hloss,classesloss
 	return loss
 
 
+
+def check(detection_layer,model):
+        expected = gridcells*(5+classes)
+        real = model.layers[len(model.layers)-1].output_shape[1]
+        if expected != real:
+                print 'cfg detection layer setting mismatch::change cfg setting'
+                print 'output layer should be '+str(expected)+'neurons'
+                print 'actual output layer is '+str(real)+'neurons'
+                exit()
 
 #
 #
