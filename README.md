@@ -15,6 +15,7 @@ Usage
 Training
 
     Python src/yolo.py train workingcfg.txt [saved_Keras_model.h5]
+    
 If saved_Keras_model.h5 option used, it will read in pretrained model and do incrmentally training
 Otherwise train from scratch
 
@@ -86,7 +87,7 @@ First following the STEP 1 ~ 9 , then at STEP 10, use follows instead
                 
                 please reference to https://github.com/opencv/opencv/issues/6677
                 
-modify cmake command to
+modify cmake command to add "-D WITH_GTK=ON"
 
 		cmake -D CMAKE_BUILD_TYPE=RELEASE \
 		-D CMAKE_INSTALL_PREFIX=/usr/local \
