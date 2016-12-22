@@ -7,6 +7,7 @@ This is a Keras implementation of the YOLO:Real-Time Object Detection
 
         YOLO paper please reference to http://pjreddie.com/darknet/yolo/
 
+        also reference http://guanghan.info/blog/en/my-works/train-yolo/
 
 Usage
 ---------------------------------------------------------------------------------------
