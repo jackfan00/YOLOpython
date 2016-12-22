@@ -13,7 +13,9 @@ import numpy as np
 from keras import backend as K
 import keras.optimizers as opt
 import cfgconst
-import opcv
+#import opcv
+import cv2
+import scipy.misc
 
 # define constant
 CLASSNUM = 2
@@ -40,6 +42,8 @@ cam_index = utils.find_int_arg(sys.argv, "-c", 0)
 model_weights_path = sys.argv[2] if len(sys.argv) > 2 else 'noweight'
 filename = sys.argv[3] if len(sys.argv) > 3 else 'nofilename'
 
+print sys.argv
+print model_weights_path+','+filename
 
 def train_yolo(cfg_path, weights_path):
 
@@ -97,21 +101,12 @@ def debug_yolo( cfg_path, model_weights_path='yolo_jack_kerasmodel.h5' ):
 	print y_test
 	print 'testloss= '+str(testloss)
 
-def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thresh=0.5):
-	print 'test_yolo'
-	# custom objective function
-	testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
-	(s,w,h,c) = testmodel.layers[0].input_shape
-	#print (s,w,h,c)
-	#exit()
-	X_test = []
-	if os.path.isfile(img_path):
-		img = Image.open(img_path.strip())
-		(orgw,orgh) = img.size
-		nim = img.resize( (w, h), Image.BILINEAR )
-		X_test.append(np.asarray(nim))
 
-	pred = testmodel.predict(np.asarray(X_test))
+def predict(X_test, testmodel, confid_thresh):
+	print 'predict'
+	
+	pred = testmodel.predict(X_test)
+	(s,w,h,c) = testmodel.layers[0].input_shape
 	
 	# find confidence value > 0.5
 	confid_index =-1
@@ -133,20 +128,20 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 			for i in range(side):
 				for j in range(side):
 					sys.stdout.write( str(p[k*49+i*7+j])+', ' )
-					if confid_index ==-1 and k==0 and p[k*49+i*7+j]>0.5:
+					if confid_index ==-1 and k==0 and p[k*49+i*7+j]>confid_thresh:
 						confid_index = i*7+j
 						foundindex = True
 						break
 				print '-'
 		#
-		confid_value = p[0*49+confid_index]
-		x_value = p[1*49+confid_index]
-		y_value = p[2*49+confid_index]
-		w_value = p[3*49+confid_index]
-		h_value = p[4*49+confid_index]
+		confid_value = max(0,p[0*49+confid_index])
+		x_value = max(0,p[1*49+confid_index])
+		y_value = max(0,p[2*49+confid_index])
+		w_value = max(0,p[3*49+confid_index])
+		h_value = max(0,p[4*49+confid_index])
 		for i in range(classes):
 			if p[(5+i)*49+confid_index] > classprob:
-				classprob = p[(5+i)*49+confid_index]
+				classprob = max(0,p[(5+i)*49+confid_index])
 				class_id = i
 		print 'c='+str(confid_value)+',x='+str(x_value)+',y='+str(y_value)+',w='+str(w_value)+',h='+str(h_value)+',cid='+str(class_id)+',prob='+str(classprob)
 		#
@@ -160,13 +155,64 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 		#del draw
 		#nim.save('predbox.png')
 		
-		opcv.showboximage(X_test[xtext_index].copy(), int(x-(w_value/2)*w), int(y-(h_value/2)*h), int(x+(w_value/2)*w), int(y+(h_value/2)*h), classprob, voc_labels[class_id])
+		sourceimage = X_test[xtext_index].copy()
+		x0 = max(0, int(x-(w_value/2)*w))
+		y0 = max(0, int(y-(h_value/2)*h))
+		x1 = int(x+(w_value/2)*w)
+		y1 = int(y+(h_value/2)*h)
+		
+		#opcv.showboximage(X_test[xtext_index].copy(), int(x-(w_value/2)*w), int(y-(h_value/2)*h), int(x+(w_value/2)*w), int(y+(h_value/2)*h), classprob, voc_labels[class_id])
 		xtext_index = xtext_index + 1
 
 	#print pred
+	return sourceimage, x0, y0, x1, y1, classprob, voc_labels[class_id]
 
-def demo_yolo(cfg_path,weights_path,thresh,cam_index,filename):
+
+def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thresh=0.5):
+        print 'test_yolo'
+        # custom objective function
+        testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
+        (s,w,h,c) = testmodel.layers[0].input_shape
+        #print (s,w,h,c)
+        #exit()
+        X_test = []
+        if os.path.isfile(img_path):
+                img = Image.open(img_path.strip())
+                (orgw,orgh) = img.size
+                nim = img.resize( (w, h), Image.BILINEAR )
+                X_test.append(np.asarray(nim))
+        predict(np.asarray(X_test), testmodel, confid_thresh)
+
+
+def demo_yolo(model_weights_path, filename, thresh=0.5):
 	print 'demo_yolo'
+	testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
+	(s,w,h,c) = testmodel.layers[0].input_shape
+
+	cap = cv2.VideoCapture(filename)
+
+	while (cap.isOpened()):
+		ret, frame = cap.read()
+		#print frame
+		nim = scipy.misc.imresize(frame, (w, h, c))
+		#nim = np.resize(frame, (w, h, c)) #, Image.BILINEAR )
+
+		img, x0, y0, x1, y1, classprob, classimgpath = predict(np.asarray([nim]), testmodel, thresh)
+		#
+		# draw bounding box
+		cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,255), 2)
+		# draw classimg
+		classimg = cv2.imread(classimgpath)
+		print str(img.shape)+','+str(classimg.shape)+','+str(x0)+','+str(y0)
+		#img[y0-classimg.shape[0]:y0, x0:x0+classimg.shape[1], 0:classimg.shape[2]] = classimg
+		# draw text
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.putText(img, str(classprob), (x0,y0-classimg.shape[0]-1), font, 4,(255,255,255),2,cv2.LINE_AA)
+		#
+		cv2.imshow('frame',img)
+		if cv2.waitKey(100) & 0xFF == ord('q'):
+                	break
+
 
 if sys.argv[1]=='train':
         train_yolo(cfg_path,model_weights_path)
@@ -176,7 +222,12 @@ elif sys.argv[1]=='test':
 	else:
 		test_yolo(filename, confid_thresh=thresh)
 elif sys.argv[1]=='demo_video':
-        demo_yolo(cfg_path,weights_path,thresh,-1,filename)
+	if os.path.isfile(model_weights_path):
+		print 'pretrain model:'+model_weights_path+', video:'+filename+', thresh:'+str(thresh)
+        	demo_yolo(model_weights_path, filename, thresh)
+	else:
+		print 'syntax error::need specify a pretrained model'
+		exit()
 elif sys.argv[1]=='debug':
         debug_yolo( cfg_path, model_weights_path )
 
