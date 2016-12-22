@@ -14,7 +14,7 @@ Usage
 
 Training
 
-    Python src/yolo.py train workingcfg.txt [saved_Keras_model.h5]
+    Python src/yolo.py train [pretrained_Keras_model.h5]
     
 If saved_Keras_model.h5 option used, it will read in pretrained model and do incrmentally training
 Otherwise train from scratch
@@ -22,7 +22,12 @@ Otherwise train from scratch
 
 Predict
 
-    Python src/yolo.py test cfg/your.cfg saved_Keras_model.h5 predicted_image.jpg
+    Python src/yolo.py test pretrained_Keras_model.h5 predicted_image.jpg
+
+
+Demo video (need install opencv)
+
+    Python src/yolo.py demo_video pretrained_Keras_model.h5 videofile
 
 
 Need to know about code
@@ -49,6 +54,8 @@ utils.py, darknet.py : misc
 
 Running enviroment 
 --------------------------------------------------------------------------------------------
+
+Keras with tensorflow backend
 
 train_data/train.txt : contain training image data file list 
 
