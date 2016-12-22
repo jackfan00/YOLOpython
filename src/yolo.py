@@ -13,6 +13,7 @@ import numpy as np
 from keras import backend as K
 import keras.optimizers as opt
 import cfgconst
+import opcv
 
 # define constant
 CLASSNUM = 2
@@ -20,24 +21,24 @@ voc_names = ["stopsign", "skis"]
 
 # run_yolo
 
-if len(sys.argv) < 3:
-	print ('usage: python %s [train/test/valid] [cfg] [model (optional)]\n' %(sys.argv[0]))
+if len(sys.argv) < 2:
+	print ('usage: python %s [train/test/valid] [pretrained model (optional)]\n' %(sys.argv[0]))
 	exit()
 
 voc_labels= []
 for i in range(CLASSNUM):
 	voc_labels.append("ui_data/labels/"+voc_names[i]+".png")
 	if  not os.path.isfile(voc_labels[i]):
-		print ('can not load image %s' %(voc_labels[i]))
+		print ('can not load image: ui_data/labels/%s' %(voc_labels[i]))
 		exit()
 
 
 import utils
 thresh = utils.find_float_arg(sys.argv, "-thresh", .2)
 cam_index = utils.find_int_arg(sys.argv, "-c", 0)
-cfg_path = sys.argv[2]
-model_weights_path = sys.argv[3] if len(sys.argv) > 3 else 'noweight'
-filename = sys.argv[4] if len(sys.argv) > 4 else 'nofilename'
+#cfg_path = sys.argv[2]
+model_weights_path = sys.argv[2] if len(sys.argv) > 2 else 'noweight'
+filename = sys.argv[3] if len(sys.argv) > 3 else 'nofilename'
 
 
 def train_yolo(cfg_path, weights_path):
@@ -124,6 +125,7 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 	det_l = cfgconst.net.layers[len(cfgconst.net.layers)-1]
         side = det_l.side
 	classes = det_l.classes
+	xtext_index =0
 	for p in pred:
 		foundindex = False
 		for k in range(5+classes):
@@ -148,10 +150,18 @@ def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thr
 				class_id = i
 		print 'c='+str(confid_value)+',x='+str(x_value)+',y='+str(y_value)+',w='+str(w_value)+',h='+str(h_value)+',cid='+str(class_id)+',prob='+str(classprob)
 		#
-		draw = ImageDraw.Draw(nim)
-		draw.rectangle([(x_value-w_value/2)*w,(y_value-h_value/2)*h,(x_value+w_value/2)*w,(y_value+h_value/2)*h])
-		del draw
-		nim.save('predbox.png')
+		row = confid_index / side
+		col = confid_index % side
+		x = (w / side) * (col + x_value)
+		y = (w / side) * (row + y_value)
+		print 'x='+str(x)+',y='+str(y)+',row='+str(row)+',col='+str(col)
+		#draw = ImageDraw.Draw(nim)
+		#draw.rectangle([x-(w_value/2)*w,y-(h_value/2)*h,x+(w_value/2)*w,y+(h_value/2)*h])
+		#del draw
+		#nim.save('predbox.png')
+		
+		opcv.showboximage(X_test[xtext_index].copy(), int(x-(w_value/2)*w), int(y-(h_value/2)*h), int(x+(w_value/2)*w), int(y+(h_value/2)*h), classprob, voc_labels[class_id])
+		xtext_index = xtext_index + 1
 
 	#print pred
 
