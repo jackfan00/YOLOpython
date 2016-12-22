@@ -86,15 +86,15 @@ First following the STEP 1 ~ 9 , then at STEP 10, use follows instead
                 
                 please reference to https://github.com/opencv/opencv/issues/6677
                 
-modift cmake command to
+modify cmake command to
 
-        cmake -D CMAKE_BUILD_TYPE=RELEASE \
-	-D CMAKE_INSTALL_PREFIX=/usr/local \
-	-D INSTALL_C_EXAMPLES=OFF \
-	-D INSTALL_PYTHON_EXAMPLES=ON \
-	-D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules \
-        -D WITH_GTK=ON \
-	-D BUILD_EXAMPLES=ON ..
+		cmake -D CMAKE_BUILD_TYPE=RELEASE \
+		-D CMAKE_INSTALL_PREFIX=/usr/local \
+		-D INSTALL_C_EXAMPLES=OFF \
+		-D INSTALL_PYTHON_EXAMPLES=ON \
+		-D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules \
+		-D WITH_GTK=ON \
+		-D BUILD_EXAMPLES=ON ..
                 
 then follow 3.1.0 setup is OK.
 
