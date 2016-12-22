@@ -6,6 +6,7 @@ def find_float_arg(argv, option, defv):
 			except:
 				print 'find_float_arg() Error::-thresh need to be float'
 				exit()
+	return defv
 
 def find_int_arg(argv, option, defv):
 	for s in argv:

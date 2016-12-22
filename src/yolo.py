@@ -45,7 +45,7 @@ filename = sys.argv[3] if len(sys.argv) > 3 else 'nofilename'
 print sys.argv
 print model_weights_path+','+filename
 
-def train_yolo(cfg_path, weights_path):
+def train_yolo( weights_path):
 
 
 	# construct network
@@ -103,7 +103,7 @@ def debug_yolo( cfg_path, model_weights_path='yolo_jack_kerasmodel.h5' ):
 
 
 def predict(X_test, testmodel, confid_thresh):
-	print 'predict'
+	print 'predict, confid_thresh='+str(confid_thresh)
 	
 	pred = testmodel.predict(X_test)
 	(s,w,h,c) = testmodel.layers[0].input_shape
@@ -124,15 +124,15 @@ def predict(X_test, testmodel, confid_thresh):
 	for p in pred:
 		foundindex = False
 		for k in range(5+classes):
-			print 'L'+str(k)
+			#print 'L'+str(k)
 			for i in range(side):
 				for j in range(side):
-					sys.stdout.write( str(p[k*49+i*7+j])+', ' )
+					#sys.stdout.write( str(p[k*49+i*7+j])+', ' )
 					if confid_index ==-1 and k==0 and p[k*49+i*7+j]>confid_thresh:
 						confid_index = i*7+j
 						foundindex = True
 						break
-				print '-'
+				#print '-'
 		#
 		confid_value = max(0,p[0*49+confid_index])
 		x_value = max(0,p[1*49+confid_index])
@@ -203,7 +203,7 @@ def demo_yolo(model_weights_path, filename, thresh=0.5):
 		cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,255), 2)
 		# draw classimg
 		classimg = cv2.imread(classimgpath)
-		print str(img.shape)+','+str(classimg.shape)+','+str(x0)+','+str(y0)
+		print 'box='+str(x0)+','+str(y0)+','+str(x1)+','+str(y1)
 		#img[y0-classimg.shape[0]:y0, x0:x0+classimg.shape[1], 0:classimg.shape[2]] = classimg
 		# draw text
 		font = cv2.FONT_HERSHEY_SIMPLEX
@@ -215,7 +215,7 @@ def demo_yolo(model_weights_path, filename, thresh=0.5):
 
 
 if sys.argv[1]=='train':
-        train_yolo(cfg_path,model_weights_path)
+        train_yolo(model_weights_path)
 elif sys.argv[1]=='test':
 	if os.path.isfile(model_weights_path):
         	test_yolo(filename, model_weights_path, confid_thresh=thresh)
