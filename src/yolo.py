@@ -18,8 +18,19 @@ import cv2
 import scipy.misc
 
 # define constant
-CLASSNUM = 2
-voc_names = ["stopsign", "skis"]
+
+det_l = cfgconst.net.layers[len(cfgconst.net.layers)-1]
+CLASSNUM = det_l.classes
+f = open(cfgconst.labelnames)
+voc_names =[]
+for ln in f:
+	voc_names.append(ln.strip()) # = ["stopsign", "skis"]
+
+# check class number
+print voc_names
+if CLASSNUM != len(voc_names):
+	print 'cfg file class setting is not equal to '+cfgconst.labelnames
+	exit()
 
 # run_yolo
 
@@ -52,7 +63,7 @@ def train_yolo( weights_path):
 
 	# construct network
 	net = cfgconst.net  #parse.parse_network_cfg(cfg_path)
-	train_images = "train_data/train.txt"
+	train_images = cfgconst.train  #"train_data/train.txt"
 	backup_directory = "backup/"
 
 	# load pretrained model 

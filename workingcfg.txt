@@ -1,1 +1,3 @@
-cfg/jack.cfg
+cfg = cfg/yolo-tiny-jack.cfg
+train = /home/jack/Downloads/train.txt
+labelnames = /home/jack/ML2016/darknet_keras/voc.names

@@ -48,9 +48,10 @@ def load_data(train_images, h, w, c, net):
 		X_train.append(data)
 
 		# replace to label path
-		fn=fn.replace("images","labels")
+		fn=fn.replace("/images/","/labels/")
+		fn=fn.replace("/JPEGImages/","/labels/")  #VOC
 		fn=fn.replace(".JPEG",".txt")
-		#fn=fn.replace(".jpg",".txt")
+		fn=fn.replace(".jpg",".txt")              #VOC
 		#fn=fn.replace(".JPG",".txt")
 		#print fn
 
@@ -103,7 +104,7 @@ def load_data(train_images, h, w, c, net):
 		#print truth[720:740]
 		#exit()
 		# this is for debug
-		if count > 1000:
+		if count > 100000:
 			break
 		else:
 			count = count + 1
