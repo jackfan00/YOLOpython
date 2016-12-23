@@ -37,6 +37,8 @@ for i in range(CLASSNUM):
 
 import utils
 thresh = utils.find_float_arg(sys.argv, "-thresh", .2)
+#print 'thresh='+str(thresh)
+#exit()
 cam_index = utils.find_int_arg(sys.argv, "-c", 0)
 #cfg_path = sys.argv[2]
 model_weights_path = sys.argv[2] if len(sys.argv) > 2 else 'noweight'
@@ -109,79 +111,138 @@ def predict(X_test, testmodel, confid_thresh):
 	(s,w,h,c) = testmodel.layers[0].input_shape
 	
 	# find confidence value > 0.5
-	confid_index =-1
-	confid_value =-1
-	x_value =-1
-	y_value =-1
-	w_value =-1
-	h_value =-1
-	class_id =-1
-	classprob =-1
+	confid_index_list =[]
+	confid_value_list =[]
+	x_value_list = []
+	y_value_list =[]
+	w_value_list =[]
+	h_value_list =[]
+	class_id_list =[]
+	classprob_list =[]
+	x0_list = []
+	x1_list = []
+	y0_list = []
+	y1_list = []
 	det_l = cfgconst.net.layers[len(cfgconst.net.layers)-1]
         side = det_l.side
 	classes = det_l.classes
 	xtext_index =0
+	foundindex = False
+	max_confid =0
+	#
 	for p in pred:
-		foundindex = False
-		for k in range(5+classes):
+		#foundindex = False
+		for k in range(1): #5+classes):
 			#print 'L'+str(k)
 			for i in range(side):
 				for j in range(side):
+					if k==0:
+						max_confid = max(max_confid,p[k*49+i*7+j])
+
 					#sys.stdout.write( str(p[k*49+i*7+j])+', ' )
-					if confid_index ==-1 and k==0 and p[k*49+i*7+j]>confid_thresh:
-						confid_index = i*7+j
+					if k==0 and p[k*49+i*7+j]>confid_thresh:
+						confid_index_list.append(i*7+j)
 						foundindex = True
-						break
 				#print '-'
+		print 'max_confid='+str(max_confid)
 		#
-		confid_value = max(0,p[0*49+confid_index])
-		x_value = max(0,p[1*49+confid_index])
-		y_value = max(0,p[2*49+confid_index])
-		w_value = max(0,p[3*49+confid_index])
-		h_value = max(0,p[4*49+confid_index])
-		for i in range(classes):
-			if p[(5+i)*49+confid_index] > classprob:
-				classprob = max(0,p[(5+i)*49+confid_index])
-				class_id = i
-		print 'c='+str(confid_value)+',x='+str(x_value)+',y='+str(y_value)+',w='+str(w_value)+',h='+str(h_value)+',cid='+str(class_id)+',prob='+str(classprob)
+		for confid_index in confid_index_list:
+			confid_value = max(0,p[0*49+confid_index])
+			x_value = max(0,p[1*49+confid_index])
+			y_value = max(0,p[2*49+confid_index])
+			w_value = max(0,p[3*49+confid_index])
+			h_value = max(0,p[4*49+confid_index])
+			maxclassprob = 0
+			maxclassprob_i =-1
+			for i in range(classes):
+				if p[(5+i)*49+confid_index] > maxclassprob and foundindex:
+					maxclassprob = p[(5+i)*49+confid_index]
+					maxclassprob_i = i
+
+			classprob_list.append( maxclassprob)
+			class_id_list.append( maxclassprob_i)
+
+			print 'max_confid='+str(max_confid)+',c='+str(confid_value)+',x='+str(x_value)+',y='+str(y_value)+',w='+str(w_value)+',h='+str(h_value)+',cid='+str(maxclassprob_i)+',prob='+str(maxclassprob)
 		#
-		row = confid_index / side
-		col = confid_index % side
-		x = (w / side) * (col + x_value)
-		y = (w / side) * (row + y_value)
-		print 'x='+str(x)+',y='+str(y)+',row='+str(row)+',col='+str(col)
+			row = confid_index / side
+			col = confid_index % side
+			x = (w / side) * (col + x_value)
+			y = (w / side) * (row + y_value)
+
+			print 'confid_index='+str(confid_index)+',x='+str(x)+',y='+str(y)+',row='+str(row)+',col='+str(col)
+
 		#draw = ImageDraw.Draw(nim)
 		#draw.rectangle([x-(w_value/2)*w,y-(h_value/2)*h,x+(w_value/2)*w,y+(h_value/2)*h])
 		#del draw
 		#nim.save('predbox.png')
 		
-		sourceimage = X_test[xtext_index].copy()
-		x0 = max(0, int(x-(w_value/2)*w))
-		y0 = max(0, int(y-(h_value/2)*h))
-		x1 = int(x+(w_value/2)*w)
-		y1 = int(y+(h_value/2)*h)
+		#sourceimage = X_test[xtext_index].copy()
+
+			x0_list.append( max(0, int(x-(w_value/2)*w)) )
+			y0_list.append( max(0, int(y-(h_value/2)*h)) )
+			x1_list.append( int(x+(w_value/2)*w) )
+			y1_list.append( int(y+(h_value/2)*h) )
 		
-		#opcv.showboximage(X_test[xtext_index].copy(), int(x-(w_value/2)*w), int(y-(h_value/2)*h), int(x+(w_value/2)*w), int(y+(h_value/2)*h), classprob, voc_labels[class_id])
-		xtext_index = xtext_index + 1
+		break
+		#xtext_index = xtext_index + 1
 
 	#print pred
-	return sourceimage, x0, y0, x1, y1, classprob, voc_labels[class_id]
+	sourceimage = X_test[0].copy()
+	return sourceimage, x0_list, y0_list, x1_list, y1_list, classprob_list, class_id_list
 
 
-def test_yolo(img_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thresh=0.5):
-        print 'test_yolo'
+def test_yolo(imglist_path, model_weights_path='yolo_jack_kerasmodel.h5', confid_thresh=0.5):
+        print 'test_yolo: '+imglist_path
         # custom objective function
-        testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
-        (s,w,h,c) = testmodel.layers[0].input_shape
         #print (s,w,h,c)
         #exit()
-        X_test = []
-        if os.path.isfile(img_path):
-                img = Image.open(img_path.strip())
-                (orgw,orgh) = img.size
-                nim = img.resize( (w, h), Image.BILINEAR )
-                X_test.append(np.asarray(nim))
-        predict(np.asarray(X_test), testmodel, confid_thresh)
+	if os.path.isfile(imglist_path):
+        	testmodel = load_model(model_weights_path, custom_objects={'yololoss': ddd.yololoss})
+        	(s,w,h,c) = testmodel.layers[0].input_shape
+		f = open(imglist_path)
+		for img_path in f:
+		#
+        		#X_test = []
+        		if os.path.isfile(img_path.strip()):
+                		frame = Image.open(img_path.strip())
+                		#(orgw,orgh) = img.size
+				nim = scipy.misc.imresize(frame, (w, h, c))
+				if nim.shape != (w, h, c):
+					continue
+
+                		#nim = img.resize( (w, h), Image.BILINEAR )
+				img, x0_list, y0_list, x1_list, y1_list, classprob_list, class_id_list = predict(np.asarray([nim]), testmodel, thresh)
+                		#X_test.append(np.asarray(nim))
+        			#predict(np.asarray(X_test), testmodel, confid_thresh)
+				# found confid box
+                		for x0,y0,x1,y1,classprob,class_id in zip(x0_list, y0_list, x1_list, y1_list, classprob_list, class_id_list):
+                		#
+					# draw bounding box
+					cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,255), 2)
+					# draw classimg
+					classimg = cv2.imread(voc_labels[class_id])
+					print 'box='+str(x0)+','+str(y0)+','+str(x1)+','+str(y1)
+					#print img.shape
+					#print classimg.shape
+					yst = max(0,y0-classimg.shape[0])
+					yend = max(y0,classimg.shape[0])
+					img[yst:yend, x0:x0+classimg.shape[1]] = classimg
+					# draw text
+					font = cv2.FONT_HERSHEY_SIMPLEX
+					cv2.putText(img, str(classprob), (x0,y0-classimg.shape[0]-1), font, 1,(255,255,255),2,cv2.LINE_AA)
+					#
+				cv2.imshow('frame',img)
+				if cv2.waitKey(1000) & 0xFF == ord('q'):
+					break
+
+
+			else:
+				print img_path+' predict fail'
+
+		cv2.destroyAllWindows()
+	else:
+		print imglist_path+' does not exist'
+	
 
 
 def demo_yolo(model_weights_path, filename, thresh=0.5):
@@ -193,25 +254,36 @@ def demo_yolo(model_weights_path, filename, thresh=0.5):
 
 	while (cap.isOpened()):
 		ret, frame = cap.read()
+		if not ret:
+			break
 		#print frame
 		nim = scipy.misc.imresize(frame, (w, h, c))
 		#nim = np.resize(frame, (w, h, c)) #, Image.BILINEAR )
 
-		img, x0, y0, x1, y1, classprob, classimgpath = predict(np.asarray([nim]), testmodel, thresh)
+		img, x0_list, y0_list, x1_list, y1_list, classprob_list, class_id_list = predict(np.asarray([nim]), testmodel, thresh)
+		# found confid box
+		for x0,y0,x1,y1,classprob,class_id in zip(x0_list, y0_list, x1_list, y1_list, classprob_list, class_id_list): 
 		#
-		# draw bounding box
-		cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,255), 2)
-		# draw classimg
-		classimg = cv2.imread(classimgpath)
-		print 'box='+str(x0)+','+str(y0)+','+str(x1)+','+str(y1)
-		#img[y0-classimg.shape[0]:y0, x0:x0+classimg.shape[1], 0:classimg.shape[2]] = classimg
-		# draw text
-		font = cv2.FONT_HERSHEY_SIMPLEX
-		cv2.putText(img, str(classprob), (x0,y0-classimg.shape[0]-1), font, 4,(255,255,255),2,cv2.LINE_AA)
-		#
+			# draw bounding box
+			cv2.rectangle(img, (x0, y0), (x1, y1), (255,255,255), 2)
+			# draw classimg
+			classimg = cv2.imread(voc_labels[class_id])
+			print 'box='+str(x0)+','+str(y0)+','+str(x1)+','+str(y1)
+			#print img.shape
+			#print classimg.shape
+			yst = max(0,y0-classimg.shape[0])
+			yend = max(y0,classimg.shape[0])
+			img[yst:yend, x0:x0+classimg.shape[1]] = classimg
+			# draw text
+			font = cv2.FONT_HERSHEY_SIMPLEX
+			cv2.putText(img, str(classprob), (x0,y0-classimg.shape[0]-1), font, 1,(255,255,255),2,cv2.LINE_AA)
+			#
 		cv2.imshow('frame',img)
 		if cv2.waitKey(100) & 0xFF == ord('q'):
-                	break
+			break
+
+	cap.release()
+	cv2.destroyAllWindows()
 
 
 if sys.argv[1]=='train':
