@@ -1,4 +1,4 @@
-# YOLOpython
+# YOLOpython -- Please reference to VGG , this project is closed
 
 Introduction
 ---------------------------------------------------------------------------------------------------
